@@ -1,23 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import Webcam from "react-webcam";
+import * as faceapi from "face-api.js";
 
 function App() {
+  const ref = React.useRef();
+  const [result, setResult] = React.useState("no expression detect");
+
+  React.useEffect(() => {
+    const fetchModel = async () => {
+      try {
+        await Promise.all([
+          faceapi.loadFaceDetectionModel("/models"),
+          faceapi.loadFaceExpressionModel("/models"),
+          faceapi.loadFaceLandmarkModel("/models"),
+          faceapi.loadFaceRecognitionModel("/models"),
+        ]);
+
+        const detectFace = await faceapi
+          .detectSingleFace(ref.current.video)
+          .withFaceExpressions();
+
+        if (!detectFace) {
+          setResult("model load failed");
+        }
+
+        const { expressions } = detectFace;
+        const currentExpression = Object.keys(expressions).reduce((a, b) =>
+          expressions[a] > expressions[b] ? a : b
+        );
+
+        setResult(currentExpression);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const intervalId = setInterval(() => {
+      fetchModel();
+    }, 2000);
+
+    return () => {
+      return clearInterval(intervalId);
+    };
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Hi</h1>
+      <Webcam ref={ref} />
+      <div>
+        <h2>{result}</h2>
+      </div>
     </div>
   );
 }
