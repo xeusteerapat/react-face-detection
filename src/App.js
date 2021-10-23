@@ -1,6 +1,8 @@
 import React from "react";
 import Webcam from "react-webcam";
 import * as faceapi from "face-api.js";
+import { Container, Divider, Text, Center, Box } from "@chakra-ui/react";
+import { getEmoji } from "./helper/emoji";
 
 function App() {
   const ref = React.useRef();
@@ -44,13 +46,16 @@ function App() {
     };
   }, []);
   return (
-    <div>
-      <h1>Hi</h1>
+    <Container mt='4'>
+      <Center>
+        <Text fontSize='3xl'>FacEmoji</Text>
+      </Center>
       <Webcam ref={ref} />
-      <div>
-        <h2>{result}</h2>
-      </div>
-    </div>
+      <Divider />
+      <Center>
+        <Text fontSize='6xl'>{getEmoji(result)}</Text>
+      </Center>
+    </Container>
   );
 }
 
